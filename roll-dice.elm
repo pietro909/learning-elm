@@ -13,32 +13,34 @@ main =
 
 -- MODEL
 type alias Model =
-    { dieFace : Int
+    { dieOne : Int
+    , dieTwo : Int
     }
 
 -- INIT
 init : (Model, Cmd Msg)
 init =
-    (Model 1, Cmd.none)
+    (Model 1 1, Cmd.none)
 
 -- UPDATE
 type Msg 
     = Roll
-    | NewFace Int
+    | NewFace (Int, Int)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         Roll ->
-            (model, Random.generate NewFace (Random.int 1 6))
-        NewFace newFace ->
-            (Model newFace, Cmd.none)
+            (model, Random.generate NewFace (Random.pair (Random.int 1 6) (Random.int 1 6)))
+        NewFace (dieOne, dieTwo) ->
+            (Model dieOne dieTwo, Cmd.none)
 
 -- VIEW
 view : Model -> Html Msg
 view model =
     div []
-        [ h1 [] [ text (toString model.dieFace) ]
+        [ h1 [] [ text (toString model.dieOne) ]
+        , h1 [] [ text (toString model.dieTwo) ]
         , button [ onClick Roll ] [ text "Roll" ]
         ]
 
