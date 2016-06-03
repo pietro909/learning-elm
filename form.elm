@@ -20,7 +20,7 @@ type alias Model =
 
 model : Model
 model =
-    Model "" 18 "" ""
+    Model "" 0 "" ""
 
 -- UPDATE
 
