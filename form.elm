@@ -3,6 +3,7 @@ import Html.App as Html
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 import String exposing (..)
+import Regex exposing (..)
 
 main =
     Html.beginnerProgram { model = model, update = update, view = view } 
@@ -52,7 +53,9 @@ viewValidation model =
     let
         (color, message) =
             if String.length model.password < 9 then
-                ("red", "Password must be longer than 8 characters") 
+                ("red", "Password must be longer than 8 characters")
+            else if !Regex.contains /[A-Za-z]/ then
+                ("red", "Password must contain at least one uppercase and one lowercase character")
             else if model.password == model.passwordAgain then
                 ("green", " OK")
             else
