@@ -54,7 +54,7 @@ viewValidation model =
         (color, message) =
             if String.length model.password < 9 then
                 ("red", "Password must be longer than 8 characters")
-            else if !Regex.contains /[A-Za-z]/ then
+            else if not(Regex.contains (regex "([A-Z][a-z])|([a-z][A-Z])") model.password) then
                 ("red", "Password must contain at least one uppercase and one lowercase character")
             else if model.password == model.passwordAgain then
                 ("green", " OK")
