@@ -1,10 +1,10 @@
 module MyHttp exposing (..)
 
-import Html exposing (Html, button, div, text, h1, h2, img)
+import Html exposing (Html, Attribute, button, div, text, h1, h2, img, input)
 import Html.App as Html
-import Html.Events exposing (onClick)
-import Html.Attributes exposing (src)
-import Json.Decode as Json
+import Html.Events exposing (..)
+import Html.Attributes exposing (..)
+import Json.Decode 
 import Task
 import Http
 
@@ -15,6 +15,12 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+
+-- COMMON EVENTS
+onKeyUp : (String -> msg) -> Attribute msg
+onKeyUp tagger =
+      Html.Events.on "keyup" (Json.Decode.map tagger Html.Events.targetValue)
 
 
 -- MODEL
@@ -33,6 +39,7 @@ type Msg
     = MorePlease
     | FetchSucceed String
     | FetchFail Http.Error
+    | NewTopic String
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -46,6 +53,8 @@ update msg model =
         FetchFail _ ->
             (model, Cmd.none)
 
+        NewTopic topic ->
+            (Model topic "", Cmd.none)
 
 getRandomGif : String -> Cmd Msg
 getRandomGif topic =
@@ -55,9 +64,9 @@ getRandomGif topic =
     in
        Task.perform FetchFail FetchSucceed (Http.get decodeGifUrl url)
 
-decodeGifUrl : Json.Decoder String
+decodeGifUrl : Json.Decode.Decoder String
 decodeGifUrl =
-    Json.at ["data", "image_url"] Json.string
+    Json.Decode.at ["data", "image_url"] Json.Decode.string
 
 
 -- VIEW
@@ -66,6 +75,7 @@ view model =
     div []
         [ h2 [] [text model.topic]
         , img [src model.gifUrl] []
+        , input [ type' "text", onKeyUp NewTopic ] []
         , button [ onClick MorePlease ] [ text "More Please!" ]
         ]
 
