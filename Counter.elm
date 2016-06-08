@@ -27,10 +27,18 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         Increment ->
-            Model (model.value + 1) model.max model.min
+            let
+                value = model.value + 1
+                max = if value > model.max then value else model.max
+            in
+                Model value max model.min
 
         Decrement ->
-            Model (model.value - 1) model.max model.min
+            let
+                value = model.value - 1
+                min = if value < model.min then value else model.min
+            in
+                Model value model.max min
 
 
 -- VIEW
