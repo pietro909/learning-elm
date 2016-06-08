@@ -3,6 +3,7 @@ module Counter exposing (Model, Msg, init, update, view)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import String
 
 
 -- MODEL
@@ -52,11 +53,17 @@ view model =
             , button [ onClick Increment ] [ text "+" ]
             ]
         , div []
-            [ div [] [ text ("min: " ++ (toString model.min)) ]
-            , div [] [ text ("max: " ++ (toString model.max))]
-            , div [] [ text ("ticks: " ++ (toString model.ticks)) ]
+            [ showNumber "min: " model.min
+            , showNumber "max: " model.max
+            , showNumber "ticks: " model.ticks
             ]
         ]
+
+showNumber : String -> Int -> Html Msg
+showNumber title value =
+    div []
+        [ text (String.concat [title, " ", toString(value)]) ]
+
 
 countStyle : Attribute msg
 countStyle =
