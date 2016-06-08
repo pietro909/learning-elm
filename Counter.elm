@@ -10,11 +10,12 @@ type alias Model =
     { value : Int
     , max : Int
     , min : Int
+    , ticks : Int
     }
 
 init : Int -> Model
 init count =
-    Model count 0 0
+    Model count 0 0 0
 
 
 -- UPDATE
@@ -31,14 +32,14 @@ update msg model =
                 value = model.value + 1
                 max = if value > model.max then value else model.max
             in
-                Model value max model.min
+                Model value max model.min (model.ticks + 1)
 
         Decrement ->
             let
                 value = model.value - 1
                 min = if value < model.min then value else model.min
             in
-                Model value model.max min
+                Model value model.max min (model.ticks + 1)
 
 
 -- VIEW
@@ -50,8 +51,11 @@ view model =
             , div [ countStyle ] [ text (toString model.value) ]
             , button [ onClick Increment ] [ text "+" ]
             ]
-        , span [] [ text (toString model.min) ]
-        , span [] [ text (toString model.max) ]
+        , div []
+            [ div [] [ text ("min: " ++ (toString model.min)) ]
+            , div [] [ text ("max: " ++ (toString model.max))]
+            , div [] [ text ("ticks: " ++ (toString model.ticks)) ]
+            ]
         ]
 
 countStyle : Attribute msg
