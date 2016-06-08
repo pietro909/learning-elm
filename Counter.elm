@@ -3,14 +3,20 @@ module Counter exposing (Model, Msg, init, update, view)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import String
 
 
 -- MODEL
-type alias Model = Int
+type alias Model =
+    { value : Int
+    , max : Int
+    , min : Int
+    , ticks : Int
+    }
 
 init : Int -> Model
 init count =
-    count
+    Model count 0 0 0
 
 
 -- UPDATE
@@ -23,20 +29,41 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         Increment ->
-            model + 1
+            let
+                value = model.value + 1
+                max = if value > model.max then value else model.max
+            in
+                Model value max model.min (model.ticks + 1)
 
         Decrement ->
-            model - 1
+            let
+                value = model.value - 1
+                min = if value < model.min then value else model.min
+            in
+                Model value model.max min (model.ticks + 1)
 
 
 -- VIEW
 view : Model -> Html Msg
 view model =
     div []
-        [ button [ onClick Decrement ] [ text "-" ]
-        , div [ countStyle ] [ text (toString model) ]
-        , button [ onClick Increment ] [ text "+" ]
+        [ div []
+            [ button [ onClick Decrement ] [ text "-" ]
+            , div [ countStyle ] [ text (toString model.value) ]
+            , button [ onClick Increment ] [ text "+" ]
+            ]
+        , div []
+            [ showNumber "min: " model.min
+            , showNumber "max: " model.max
+            , showNumber "ticks: " model.ticks
+            ]
         ]
+
+showNumber : String -> Int -> Html Msg
+showNumber title value =
+    div []
+        [ text (String.concat [title, " ", toString(value)]) ]
+
 
 countStyle : Attribute msg
 countStyle =
