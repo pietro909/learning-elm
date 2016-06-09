@@ -60,7 +60,7 @@ view : Model -> Html Msg
 view model =
     let
         remove =
-            button [ onClick Remove ] [ text "Remove" ]
+            button [ onClick Remove ] [ text 1 ]
 
         insert =
             button [ onClick Insert ] [ text "Add" ]
