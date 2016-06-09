@@ -60,7 +60,7 @@ view model =
             [ circle [ cx "50", cy "50", r "45", fill "#0B79CE" ] []
             , buildNeedle seconds 40
             , buildNeedle minutes 35
-            , buildNeedle hours 30
+            , buildNeedle hours 25
             ]
 
 buildNeedle : Float -> Int -> Html Msg
