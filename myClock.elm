@@ -54,11 +54,13 @@ view model =
     let
         seconds = toFloat(Date.second model)
         minutes = toFloat(Date.minute model)
+        hours = toFloat(5 * (Date.hour model))
     in
         svg [ viewBox "0 0 100 100", width "300px" ]
             [ circle [ cx "50", cy "50", r "45", fill "#0B79CE" ] []
-            , buildNeedle seconds 35
-            , buildNeedle minutes 40
+            , buildNeedle seconds 40
+            , buildNeedle minutes 35
+            , buildNeedle hours 30
             ]
 
 buildNeedle : Float -> Int -> Html Msg
