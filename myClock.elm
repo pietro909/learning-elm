@@ -22,7 +22,7 @@ type alias Model = Date
 
 init : (Model, Cmd Msg)
 init =
-    (Date.fromTime 1.0, Cmd.none)
+    (Date.fromTime 0.0, Cmd.none)
 
 
 -- UPDATE
