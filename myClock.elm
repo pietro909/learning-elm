@@ -52,29 +52,22 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     let
-        seconds = Date.second model
-        turn = (toFloat(seconds) / 60) - 0.25
-        angle = turns turn
-        handX =
-            toString (50 + 40 * cos angle)
-
-        handY =
-            toString (50 + 40 * sin angle)
-
+        seconds = toFloat(Date.second model)
+        minutes = toFloat(Date.minute model)
     in
         svg [ viewBox "0 0 100 100", width "300px" ]
             [ circle [ cx "50", cy "50", r "45", fill "#0B79CE" ] []
-            , line [ x1 "50", y1 "50", x2 handX, y2 handY, stroke "#023963" ] []
-            , lineMinutes model
+            , buildNeedle seconds 35
+            , buildNeedle minutes 40
             ]
 
-lineMinutes : Date -> Html Msg
-lineMinutes model =
+buildNeedle : Float -> Int -> Html Msg
+buildNeedle unit size =
     let
-        seconds = Date.minute model
-        turn = (toFloat(seconds) / 60) - 0.25
+        turn = unit / 60 - 0.25
         angle = turns turn
-        handX = toString (50 + 35 * cos angle)
-        handY = toString (50 + 35 * sin angle)
+        handX = toString (50 + toFloat(size) * cos angle)
+        handY = toString (50 + toFloat(size) * sin angle)
     in
-       line [ x1 "50", y1 "50", x2 handX, y2 handY, stroke "#663963" ] []
+       line [ x1 "50", y1 "50", x2 handX, y2 handY, stroke "#023963" ] []
+
