@@ -50,10 +50,15 @@ getPhotoUrl index =
     Just photo -> photo.url
     Nothing -> ""
 
-viewSizeChooser : ThumbnailSize -> Html Msg
-viewSizeChooser size =
+viewSizeChooser : ThumbnailSize -> ThumbnailSize -> Html Msg
+viewSizeChooser current size =
   label []
-    [ input [ type_ "radio", name "size", onClick (SetSize size) ] []
+    [ input
+      [ type_ "radio"
+      , name "size"
+      , onClick (SetSize size)
+      , checked (size == current)
+      ] []
     , text (sizeToString size)
     ]
 
@@ -75,7 +80,7 @@ view model =
       [ text "Surprise me!" ]
     , h3 [] [ text "Thumbnail size:" ]
     , div [ id "choose-size" ]
-      ( List.map viewSizeChooser [ Small, Medium, Large ] )
+      ( List.map (viewSizeChooser model.chosenSize) [ Small, Medium, Large ] )
     , div [ id "thumbnails", class (sizeToString model.chosenSize) ]
       (List.map (viewThumbnail model.selectedUrl) model.photos)
     , img
