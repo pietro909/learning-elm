@@ -1,3 +1,4 @@
 *.swp
 elm-stuff
-index.html
+./first-tutorials/index.html
+elm.js
