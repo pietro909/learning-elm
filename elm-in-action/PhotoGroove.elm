@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Array exposing (Array)
 import Random
+import Http
 
 type alias Photo =
   { url : String }
@@ -34,6 +35,7 @@ type Msg
   | SelectByIndex Int
   | SetSize ThumbnailSize
   | SurpriseMe
+  | LoadPhotos (Result Http.Error String)
 
 urlPrefix : String
 urlPrefix = "http://elm-in-action.com/"
@@ -115,12 +117,26 @@ update msg model =
             |> Maybe.map .url
       in
         ({ model | selectedUrl = newSelectedUrl }, Cmd.none)
+    LoadPhotos (Ok responseStr) ->
+      let
+        urls = String.split "," responseStr
+        photos = List.map Photo urls
+      in
+        ({ model | photos = photos }, Cmd.none) 
+    LoadPhotos (Err _) ->
+      (model, Cmd.none)
+
+initialCmd : Cmd Msg
+initialCmd =
+  "http://elm-in-action.com/photos/list"
+    |> Http.getString
+    |> Http.send LoadPhotos
 
 main : Program Never Model Msg
 main =
   Html.program
-    { init = (initialModel, Cmd.none)
+    { init = (initialModel, initialCmd)
     , view = view
     , update = update
-    , subscriptions = (\model -> Sub.none)
+    , subscriptions = (\_ -> Sub.none)
     }
