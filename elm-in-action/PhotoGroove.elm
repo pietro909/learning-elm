@@ -2,23 +2,29 @@ module PhotoGroove exposing (..)
 
 import Html exposing (..)
 import Html.Attributes as Attr exposing (id, class, classList, src,  name, type_, title, checked)
-import Html.Events exposing (onClick)
+import Html.Events exposing (on, onClick)
 import Array exposing (Array)
 import Random
 import Http
-import Json.Decode exposing (string, int, list, Decoder)
+import Json.Decode exposing (Decoder, at, int, list, string)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 
 paperSlider : List (Attribute msg) -> List (Html msg) -> Html msg
 paperSlider = Html.node "paper-slider"
 
-viewFilter : String -> Int -> Html msg
-viewFilter name magnitude =
+viewFilter : String -> (Int -> msg) -> Int -> Html msg
+viewFilter name toMsg magnitude =
   div [ class "filter-slider" ]
     [ label [] [ text name ]
-    , paperSlider [ Attr.max "11" ] []
+    , paperSlider [ Attr.max "11", onImmediateValueChange toMsg ] []
     , label [] [ text (toString magnitude) ]
     ]
+
+onImmediateValueChange : (Int -> msg) -> Attribute msg
+onImmediateValueChange toMsg =
+  at [ "target", "immediateValue" ] int
+    |> Json.Decode.map toMsg
+    |> on "immediate-value-changed"
 
 type alias Photo =
   { size : Int
@@ -43,6 +49,9 @@ type alias Model =
   , selectedUrl : Maybe String
   , loadingError : Maybe String
   , chosenSize : ThumbnailSize
+  , hue : Int
+  , ripple : Int
+  , noise : Int
   }
 
 initialModel : Model
@@ -51,6 +60,9 @@ initialModel =
   , selectedUrl = Nothing
   , loadingError = Nothing
   , chosenSize = Medium
+  , hue = 0
+  , ripple = 0
+  , noise = 0
   }
 
 type Msg
@@ -59,6 +71,9 @@ type Msg
   | SetSize ThumbnailSize
   | SurpriseMe
   | LoadPhotos (Result Http.Error (List Photo))
+  | SetHue Int
+  | SetRipple Int
+  | SetNoise Int
 
 urlPrefix : String
 urlPrefix = "http://elm-in-action.com/"
@@ -122,9 +137,9 @@ view model =
       [ onClick SurpriseMe ]
       [ text "Surprise me!" ]
     , div [ class "filters" ]
-      [ viewFilter "Hue" 0
-      , viewFilter "Ripple" 0
-      , viewFilter "Noise" 0
+      [ viewFilter "Hue" SetHue model.hue
+      , viewFilter "Ripple" SetRipple model.ripple
+      , viewFilter "Noise" SetNoise model.noise
       ]
     , h3 [] [ text "Thumbnail size:" ]
     , div [ id "choose-size" ]
@@ -167,6 +182,25 @@ update msg model =
     LoadPhotos (Err _) ->
       ( { model
           | loadingError = Just  "There was an error with HTTP"
+        }
+      , Cmd.none
+      )
+    SetHue amount ->
+      ( { model
+          | hue = amount
+        }
+      , Cmd.none
+      )
+    SetRipple amount ->
+      ( { model
+          | ripple = amount
+        }
+      , Cmd.none
+      )
+
+    SetNoise amount ->
+      ( { model
+          | noise = amount
         }
       , Cmd.none
       )
