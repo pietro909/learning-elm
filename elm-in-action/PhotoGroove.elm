@@ -1,13 +1,24 @@
 module PhotoGroove exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (id, class, classList, src, name, type_, title, checked)
+import Html.Attributes as Attr exposing (id, class, classList, src,  name, type_, title, checked)
 import Html.Events exposing (onClick)
 import Array exposing (Array)
 import Random
 import Http
 import Json.Decode exposing (string, int, list, Decoder)
 import Json.Decode.Pipeline exposing (decode, required, optional)
+
+paperSlider : List (Attribute msg) -> List (Html msg) -> Html msg
+paperSlider = Html.node "paper-slider"
+
+viewFilter : String -> Int -> Html msg
+viewFilter name magnitude =
+  div [ class "filter-slider" ]
+    [ label [] [ text name ]
+    , paperSlider [ Attr.max "11" ] []
+    , label [] [ text (toString magnitude) ]
+    ]
 
 type alias Photo =
   { size : Int
@@ -110,6 +121,11 @@ view model =
     , button
       [ onClick SurpriseMe ]
       [ text "Surprise me!" ]
+    , div [ class "filters" ]
+      [ viewFilter "Hue" 0
+      , viewFilter "Ripple" 0
+      , viewFilter "Noise" 0
+      ]
     , h3 [] [ text "Thumbnail size:" ]
     , div [ id "choose-size" ]
       ( List.map (viewSizeChooser model.chosenSize) [ Small, Medium, Large ] )
@@ -160,6 +176,8 @@ initialCmd =
   list photoDecoder 
     |> Http.get "http://elm-in-action.com/photos/list.json"
     |> Http.send LoadPhotos
+
+-- Http.send LoadPhotos (Http.get "http://elm-in-action.com/photos/list.json"  (list photoDecoder) )
 
 main : Program Never Model Msg
 main =
