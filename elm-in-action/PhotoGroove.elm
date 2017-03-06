@@ -34,6 +34,8 @@ type alias Photo =
 
 port setFilters : FilterOptions -> Cmd msg
 
+port statusChanges : (String -> msg) -> Sub msg
+
 type alias FilterOptions =
   { url : String
   , filters : List { name : String, amount : Float }
@@ -59,6 +61,7 @@ type alias Model =
   , hue : Int
   , ripple : Int
   , noise : Int
+  , status : String
   }
 
 initialModel : Model
@@ -70,6 +73,7 @@ initialModel =
   , hue = 0
   , ripple = 0
   , noise = 0
+  , status = ""
   }
 
 type Msg
@@ -81,6 +85,7 @@ type Msg
   | SetHue Int
   | SetRipple Int
   | SetNoise Int
+  | SetStatus String
 
 urlPrefix : String
 urlPrefix = "http://elm-in-action.com/"
@@ -139,6 +144,7 @@ view model =
     , button
       [ onClick SurpriseMe ]
       [ text "Surprise me!" ]
+    , div [ class "status" ] [ text model.status ]
     , div [ class "filters" ]
       [ viewFilter "Hue" SetHue model.hue
       , viewFilter "Ripple" SetRipple model.ripple
@@ -213,6 +219,11 @@ update msg model =
         cmd = applyFilters newModel
       in
         (newModel, cmd)
+    SetStatus status ->
+      let
+        newModel = { model | status = status }
+      in
+        (newModel, Cmd.none)
 
 applyFilters : Model -> Cmd Msg
 applyFilters model =
@@ -238,11 +249,19 @@ initialCmd =
 
 -- Http.send LoadPhotos (Http.get "http://elm-in-action.com/photos/list.json"  (list photoDecoder) )
 
-main : Program Never Model Msg
+main : Program Float Model Msg
 main =
-  Html.program
-    { init = (initialModel, initialCmd)
+  Html.programWithFlags
+    { init = init
     , view = viewOrError
     , update = update
-    , subscriptions = (\_ -> Sub.none)
+    , subscriptions = (\_ -> statusChanges SetStatus)
     }
+
+init : Float -> (Model, Cmd Msg)
+init flags =
+  let
+    status = "Initializing Pasta v." ++ (toString flags)
+    model = { initialModel | status = status }
+  in
+    (initialModel, initialCmd)
