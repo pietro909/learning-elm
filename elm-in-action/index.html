@@ -5,12 +5,20 @@
     <!-- prevent Polymer from using Shady DOM -->
     <script>window.Polymer = {dom: "shadow"};</script>
     <link rel="import" href="http://elm-in-action.com/wc/slider/paper-slider.html">
+    <script src="http://elm-in-action.com/pasta.js"></script>
   </head>
   <body>
     <div id="elm-area"></div>
     <script src="elm.js"></script>
     <script>
-      Elm.PhotoGroove.embed(document.getElementById("elm-area"));
+      var app = Elm.PhotoGroove.embed(document.getElementById("elm-area"));
+
+      app.ports.setFilters.subscribe(function(options) {
+        requestAnimationFrame(function() {
+          var canvas = document.getElementById("main-canvas")
+          Pasta.apply(canvas, options)
+        });
+      });
     </script>
   </body>
 </html>

@@ -1,4 +1,4 @@
-module PhotoGroove exposing (..)
+port module PhotoGroove exposing (..)
 
 import Html exposing (..)
 import Html.Attributes as Attr exposing (id, class, classList, src,  name, type_, title, checked)
@@ -30,6 +30,13 @@ type alias Photo =
   { size : Int
   , title : String
   , url : String
+  }
+
+port setFilters : FilterOptions -> Cmd msg
+
+type alias FilterOptions =
+  { url : String
+  , filters : List { name : String, amount : Float }
   }
 
 photoDecoder : Decoder Photo
@@ -113,11 +120,7 @@ viewLarge maybeUrl =
     Nothing ->
       text ""
     Just url ->
-      img
-        [ class "large"
-        , src (urlPrefix ++ "large/" ++ url)
-        ]
-        []
+      canvas [ id "main-canvas", class "large" ] []
 
 viewOrError : Model -> Html Msg
 viewOrError model =
@@ -153,7 +156,11 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     SelectByUrl url ->
-      ({ model | selectedUrl = Just url }, Cmd.none)
+      let
+        newModel = { model | selectedUrl = Just url }
+        cmd = applyFilters newModel
+      in
+        (newModel, cmd)
     SetSize size ->
       ({ model | chosenSize = size }, Cmd.none)
     SurpriseMe ->
@@ -169,16 +176,19 @@ update msg model =
             |> Array.fromList
             |> Array.get index
             |> Maybe.map .url
+        newModel = { model | selectedUrl = newSelectedUrl }
+        cmd = applyFilters newModel
       in
-        ({ model | selectedUrl = newSelectedUrl }, Cmd.none)
+        (newModel, cmd)
     LoadPhotos (Ok photos) ->
-      (
-        { model
-          | photos = photos
+      let
+        newModel =
+          { model | photos = photos
           , selectedUrl = Maybe.map .url (List.head photos)
-        }
-        , Cmd.none
-      ) 
+          }
+        cmd = applyFilters newModel
+      in
+        (newModel, cmd)
     LoadPhotos (Err _) ->
       ( { model
           | loadingError = Just  "There was an error with HTTP"
@@ -186,24 +196,39 @@ update msg model =
       , Cmd.none
       )
     SetHue amount ->
-      ( { model
-          | hue = amount
-        }
-      , Cmd.none
-      )
+      let
+        newModel = { model | hue = amount }
+        cmd = applyFilters newModel
+      in
+        (newModel, cmd)
     SetRipple amount ->
-      ( { model
-          | ripple = amount
-        }
-      , Cmd.none
-      )
-
+      let
+        newModel = { model | ripple = amount }
+        cmd = applyFilters newModel
+      in
+        (newModel, cmd)
     SetNoise amount ->
-      ( { model
-          | noise = amount
-        }
-      , Cmd.none
-      )
+      let
+        newModel = { model | noise = amount }
+        cmd = applyFilters newModel
+      in
+        (newModel, cmd)
+
+applyFilters : Model -> Cmd Msg
+applyFilters model =
+  case model.selectedUrl of
+    Just selectedUrl ->
+      let
+        filters =
+          [ { name = "Hue", amount = (toFloat model.hue) / 11 }
+          , { name = "Ripple", amount = (toFloat model.ripple) / 11 }
+          , { name = "Noise", amount = (toFloat model.noise) / 11 }
+          ]
+        url = urlPrefix ++ "large/" ++ selectedUrl
+      in
+        setFilters { url = url, filters = filters }
+    Nothing ->
+      Cmd.none
 
 initialCmd : Cmd Msg
 initialCmd =
